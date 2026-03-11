@@ -3941,7 +3941,7 @@ prometheus:
       honor_labels: false
       scheme: https
       tls_config:
-        insecure_skip_verify: true
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
       bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
       kubernetes_sd_configs:
       - role: node
@@ -3958,7 +3958,7 @@ prometheus:
       metrics_path: /metrics/cadvisor
       scheme: https
       tls_config:
-        insecure_skip_verify: true
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
       bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
       kubernetes_sd_configs:
       - role: node
