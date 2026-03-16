@@ -1003,7 +1003,7 @@ grafana:
           url: https://raw.githubusercontent.com/platform9/pf9-kube-prometheus-helm-chart/main/charts/kube-prometheus-stack/grafana/grafana-dashboard-node-exporter
           token: ''
         metallb:
-          url: https://raw.githubusercontent.com/platform9/pf9-kube-prometheus-helm-chart/private/dc/main/pmk-6759/charts/kube-prometheus-stack/grafana/grafana-dashboard-metallb
+          url: https://raw.githubusercontent.com/platform9/pf9-kube-prometheus-helm-chart/main/charts/kube-prometheus-stack/grafana/grafana-dashboard-metallb
           token: ''
 #TODO change metallb dashboard url to point main branch instead of private.
 
