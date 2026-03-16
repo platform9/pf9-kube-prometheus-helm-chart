@@ -1,0 +1,216 @@
+{{- if and .Values.metallb.enabled .Values.metallb.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "kube-prometheus-stack.fullname" . }}-metallb
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  labels:
+    app: {{ template "kube-prometheus-stack.name" . }}-prometheus
+    {{ include "kube-prometheus-stack.labels" . | nindent 4 }}
+    component: metallb
+spec:
+  groups:
+    - name: metallb
+      interval: 30s
+      rules:
+
+          - alert: MetalLBStaleConfig
+            expr: metallb_k8s_client_config_stale_bool == 1
+            for: 1m
+            labels:
+              severity: warning
+              component: metallb
+            annotations:
+              summary: "Stale config on {{ `{{$labels.pod}}` }}"
+              description: |
+                MetalLB {{ `{{$labels.container}}` }} on {{ `{{$labels.pod}}` }}
+                has a stale config for > 1 minute.
+                This means the configuration has not been updated recently.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/staleconfig"
+
+          - alert: MetalLBConfigNotLoaded
+            expr: metallb_k8s_client_config_loaded_bool == 0
+            for: 1m
+            labels:
+              severity: critical
+              component: metallb
+            annotations:
+              summary: "Config on {{ `{{$labels.pod}}` }} has not been loaded"
+              description: |
+                MetalLB {{ `{{$labels.container}}` }} on {{ `{{$labels.pod}}` }}
+                has not loaded configuration for > 1 minute.
+                This is critical as the pod cannot function without a valid config.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/confignotloaded"
+
+          - alert: MetalLBAddressPoolExhausted
+            expr: metallb_allocator_addresses_in_use_total >= on(pool) metallb_allocator_addresses_total
+            for: 1m
+            labels:
+              severity: critical
+              component: metallb
+            annotations:
+              summary: "Address pool {{ `{{$labels.pool}}` }} exhausted on {{ `{{$labels.pod}}` }}"
+              description: |
+                MetalLB {{ `{{$labels.container}}` }} on {{ `{{$labels.pod}}` }}
+                has exhausted address pool {{ `{{$labels.pool}}` }} for > 1 minute.
+                No new LoadBalancer services can be provisioned until IPs are freed.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/poolexhausted"
+
+          - alert: MetalLBAddressPoolUsage90Percent
+            expr: |
+              (metallb_allocator_addresses_in_use_total
+               / on(pool) metallb_allocator_addresses_total) * 100 > 90
+            for: 1m
+            labels:
+              severity: warning
+              component: metallb
+            annotations:
+              summary: "Address pool {{ `{{$labels.pool}}` }} on {{ `{{$labels.pod}}` }} past 90% usage"
+              description: |
+                MetalLB {{ `{{$labels.container}}` }} on {{ `{{$labels.pod}}` }}
+                has address pool {{ `{{$labels.pool}}` }} at {{ `{{$value}}` }}% usage for > 1 minute.
+                Urgent action needed to avoid running out of IPs.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/poolusage90"
+
+          - alert: MetalLBAddressPoolUsage80Percent
+            expr: |
+              (metallb_allocator_addresses_in_use_total
+               / on(pool) metallb_allocator_addresses_total) * 100 > 80
+            for: 5m
+            labels:
+              severity: warning
+              component: metallb
+            annotations:
+              summary: "Address pool {{ `{{$labels.pool}}` }} on {{ `{{$labels.pod}}` }} at 80% usage"
+              description: |
+                MetalLB {{ `{{$labels.container}}` }} on {{ `{{$labels.pod}}` }}
+                has address pool {{ `{{$labels.pool}}` }} at {{ `{{$value}}` }}% usage.
+                Consider planning expansion of IP address pools.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/poolusage80"
+
+          - alert: MetalLBBGPSessionDown
+            expr: metallb_bgp_session_up == 0
+            for: 1m
+            labels:
+              severity: critical
+              component: metallb
+            annotations:
+              summary: "BGP session down on {{ `{{$labels.pod}}` }}"
+              description: |
+                MetalLB {{ `{{$labels.container}}` }} on {{ `{{$labels.pod}}` }}
+                has BGP session {{ `{{$labels.peer}}` }} down for > 1 minute.
+                This means route advertisement to external networks is affected.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/bgpsessiondown"
+
+          - alert: MetalLBBGPSessionFlapping
+            expr: changes(metallb_bgp_session_up[5m]) > 3
+            for: 2m
+            labels:
+              severity: warning
+              component: metallb
+            annotations:
+              summary: "BGP session flapping on {{ `{{$labels.pod}}` }}"
+              description: |
+                MetalLB {{ `{{$labels.container}}` }} on {{ `{{$labels.pod}}` }}
+                BGP session {{ `{{$labels.peer}}` }} is flapping (changed state {{ `{{$value}}` }} times in 5m).
+                This indicates network instability.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/bgpflapping"
+
+          - alert: MetalLBControllerDown
+            expr: (sum(up{job="metallb-controller-metrics"}) == 0) or absent(up{job="metallb-controller-metrics"})
+            for: 5m
+            labels:
+              severity: critical
+              component: metallb
+            annotations:
+              summary: "MetalLB Controller is down"
+              description: |
+                MetalLB Controller pod is not responding for the last 5 minutes.
+                Address pool management and configuration updates will not work.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/controllerdown"
+
+          - alert: MetalLBSpeakerDown
+            expr: (sum(up{job="metallb-speaker-metrics"}) == 0) or absent(up{job="metallb-speaker-metrics"})
+            for: 5m
+            labels:
+              severity: warning
+              component: metallb
+            annotations:
+              summary: "MetalLB Speaker is down"
+              description: |
+                MetalLB Speaker pod is not responding for the last 5 minutes.
+                Route advertisement and protocol updates will not work on this node.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/speakerdown"
+
+          - alert: MetalLBL2AdvertisementFailures
+            expr: increase(metallb_l2_announce_total{result="error"}[5m]) > 0
+            for: 5m
+            labels:
+              severity: warning
+              component: metallb
+            annotations:
+              summary: "MetalLB L2 advertisement failures detected"
+              description: |
+                MetalLB encountered {{ `{{$value}}` }} L2 advertisement errors in the last 5 minutes.
+                Some LoadBalancer services may not be accessible via L2.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/l2advertisement"
+
+          - alert: MetalLBBFDSessionDown
+            expr: metallb_bfd_session_up == 0
+            for: 5m
+            labels:
+              severity: warning
+              component: metallb
+            annotations:
+              summary: "MetalLB BFD session is down"
+              description: |
+                MetalLB BFD session for peer {{ `{{$labels.peer}}` }} is down.
+                Fast failover detection for this peer is not working.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/bfdsessiondown"
+
+          - alert: MetalLBHighAllocationRate
+            expr: rate(metallb_allocator_addresses_in_use_total[5m]) > 0.1
+            for: 10m
+            labels:
+              severity: warning
+              component: metallb
+            annotations:
+              summary: "MetalLB allocating IPs at high rate"
+              description: |
+                Pool '{{ `{{$labels.pool}}` }}' is allocating IPs at {{ `{{$value}}` }}/sec.
+                Check for rapid service creation or leaks.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/highallocation"
+
+          - alert: MetalLBNoAdvertisements
+            expr: rate(metallb_advertised_total[5m]) == 0
+            for: 5m
+            labels:
+              severity: critical
+              component: metallb
+            annotations:
+              summary: "MetalLB is not advertising routes"
+              description: |
+                MetalLB on {{ `{{$labels.pod}}` }} is not advertising any routes.
+                LoadBalancer services will not be accessible externally.
+              runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/metallb/noadvertisements"
+
+          - record: metallb:allocator:usage:percent
+            expr: |
+              (metallb_allocator_addresses_in_use_total
+               / on(pool) metallb_allocator_addresses_total) * 100
+            labels:
+              component: metallb
+
+          - record: metallb:bgp:session:uptime:hours
+            expr: |
+              (time() - metallb_bgp_session_uptime_seconds) / 3600
+            labels:
+              component: metallb
+
+          - record: metallb:controller:uptime:hours
+            expr: |
+              (time() - process_start_time_seconds{job="metallb-controller"}) / 3600
+            labels:
+              component: metallb
+
+{{- end }}

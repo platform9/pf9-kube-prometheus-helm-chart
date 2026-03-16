@@ -318,3 +318,20 @@ global:
 {{ $fullname }}-webhook.{{ $namespace }}.svc
 {{- end }}
 {{- end }}
+
+{{- define "metallb.selectorKey" -}}
+{{- $deploy := lookup "apps/v1" "Deployment" "metallb-system" "metallb-controller" }}
+
+{{- if $deploy }}
+  {{- $labels := $deploy.spec.template.metadata.labels }}
+
+  {{- if hasKey $labels "app.kubernetes.io/component" }}
+app.kubernetes.io/component
+  {{- else }}
+component
+  {{- end }}
+
+{{- else }}
+component
+{{- end }}
+{{- end }}

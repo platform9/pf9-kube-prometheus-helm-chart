@@ -1002,6 +1002,10 @@ grafana:
         node-exporter:
           url: https://raw.githubusercontent.com/platform9/pf9-kube-prometheus-helm-chart/main/charts/kube-prometheus-stack/grafana/grafana-dashboard-node-exporter
           token: ''
+        metallb:
+          url: https://raw.githubusercontent.com/platform9/pf9-kube-prometheus-helm-chart/main/charts/kube-prometheus-stack/grafana/grafana-dashboard-metallb
+          token: ''
+#TODO change metallb dashboard url to point main branch instead of private.
 
   dashboardProviders:
      dashboardproviders.yaml:
@@ -2582,7 +2586,7 @@ prometheusOperator:
       image:
         registry: registry.k8s.io
         repository: ingress-nginx/kube-webhook-certgen
-        tag: v20221220-controller-v1.5.2
+        tag: v1.5.2
         sha: ""
         pullPolicy: IfNotPresent
       resources: {}
@@ -4921,3 +4925,15 @@ extraManifests: []
   #     name: prometheus-extra
   #   data:
   #     extra-data: "value"
+
+# Metallb monitoring configuration
+metallb:
+  enabled: true
+
+  serviceMonitor:
+    interval: 30s
+    scrapeTimeout: 10s
+    path: /metrics
+
+  prometheusRule:
+    enabled: true

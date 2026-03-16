@@ -1,0 +1,5 @@
+{{ include "metallb.metricsService" (dict "name" "metallb-controller-metrics" "component" "controller" "root" .) }}
+
+---
+
+{{ include "metallb.metricsService" (dict "name" "metallb-speaker-metrics" "component" "speaker" "root" .) }}

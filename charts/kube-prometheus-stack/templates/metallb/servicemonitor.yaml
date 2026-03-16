@@ -1,0 +1,53 @@
+{{- if .Values.metallb.enabled }}
+apiVersion: v1
+kind: List
+metadata:
+  name: {{ include "kube-prometheus-stack.fullname" . }}-metallb-servicemonitors
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+items:
+  - apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: {{ include "kube-prometheus-stack.fullname" . }}-metallb-controller
+      namespace: {{ template "kube-prometheus-stack.namespace" . }}
+      labels:
+        app: {{ template "kube-prometheus-stack.name" . }}-prometheus
+        {{ include "kube-prometheus-stack.labels" . | nindent 8 }}
+        component: metallb
+    spec:
+      selector:
+        matchLabels:
+          app: metallb
+          component: controller
+      namespaceSelector:
+        matchNames:
+          - metallb-system
+      endpoints:
+        - port: monitoring
+          interval: {{ .Values.metallb.serviceMonitor.interval | default "30s" }}
+          scrapeTimeout: {{ .Values.metallb.serviceMonitor.scrapeTimeout | default "10s" }}
+          path: {{ .Values.metallb.serviceMonitor.path | default "/metrics" }}
+
+  - apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: {{ include "kube-prometheus-stack.fullname" . }}-metallb-speaker
+      namespace: {{ template "kube-prometheus-stack.namespace" . }}
+      labels:
+        app: {{ template "kube-prometheus-stack.name" . }}-prometheus
+        {{ include "kube-prometheus-stack.labels" . | nindent 8 }}
+        component: metallb
+    spec:
+      selector:
+        matchLabels:
+          app: metallb
+          component: speaker
+      namespaceSelector:
+        matchNames:
+          - metallb-system
+      endpoints:
+        - port: monitoring
+          interval: {{ .Values.metallb.serviceMonitor.interval | default "30s" }}
+          scrapeTimeout: {{ .Values.metallb.serviceMonitor.scrapeTimeout | default "10s" }}
+          path: {{ .Values.metallb.serviceMonitor.path | default "/metrics" }}
+{{- end }}
