@@ -270,6 +270,10 @@ alertmanager:
   ## Deploy alertmanager
   ##
   enabled: true
+  networkPolicy:
+    enabled: false
+
+
 
   ## Annotations for Alertmanager
   ##
@@ -956,6 +960,10 @@ grafana:
   enabled: true
   namespaceOverride: "pf9-monitoring"
   # ------------------------------------ PF9 Customizations -------------------------------------
+  operator:
+    ## Enable references to ConfigMaps containing dashboards in GrafanaDashboard CRs
+    ## Set to true to allow dashboards to be loaded from ConfigMap references
+   dashboardsConfigMapRefEnabled: false
   grafana.ini:
     paths:
       data: /var/lib/grafana/
@@ -2123,6 +2131,8 @@ kubeStateMetrics:
 ## Configuration for kube-state-metrics subchart
 ##
 kube-state-metrics:
+  podSecurityPolicy:
+    enabled: false
   namespaceOverride: "pf9-monitoring"
   rbac:
     create: true
@@ -2197,6 +2207,8 @@ nodeExporter:
     linux:
       enabled: true
     darwin:
+      enabled: true
+    aix:
       enabled: true
 
   ## ForceDeployDashboard Create dashboard configmap even if nodeExporter deployment has been disabled
@@ -2331,6 +2343,13 @@ prometheusOperator:
     successThreshold: 1
     timeoutSeconds: 1
 
+  podDisruptionBudget:
+   enabled: false
+   minAvailable: 1
+   # maxUnavailable: ""
+   unhealthyPodEvictionPolicy: AlwaysAllow
+
+
   ## Admission webhook support for PrometheusRules resources added in Prometheus Operator 0.30 can be enabled to prevent incorrectly formatted
   ## rules from making their way into prometheus and potentially preventing the container from starting
   admissionWebhooks:
@@ -2374,10 +2393,6 @@ prometheusOperator:
       strategy: {}
 
       # Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
-      podDisruptionBudget: {}
-        # maxUnavailable: 1
-        # minAvailable: 1
-
       ## Number of old replicasets to retain ##
       ## The default value is 10, 0 will garbage-collect old replicasets ##
       revisionHistoryLimit: 10
@@ -2780,6 +2795,10 @@ prometheusOperator:
     ## Use '{{ template "kube-prometheus-stack.fullname" . }}-kubelet' by default
     name: ""
 
+  ## Create Endpoints objects for kubelet targets.
+  kubeletEndpointsEnabled: true
+  ## Create EndpointSlice objects for kubelet targets.
+  kubeletEndpointSliceEnabled: false
   ## Create a servicemonitor for the operator
   ##
   serviceMonitor:
@@ -4928,7 +4947,7 @@ extraManifests: []
 
 # Metallb monitoring configuration
 metallb:
-  enabled: true
+  enabled: false 
 
   serviceMonitor:
     interval: 30s
