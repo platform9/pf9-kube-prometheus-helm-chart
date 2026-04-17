@@ -78,7 +78,7 @@ entries:
     - https://github.com/prometheus-operator/kube-prometheus
     type: application
     urls:
-    - https://github.com/platform9/pf9-kube-prometheus-helm-chart/releases/download/kube-prometheus-stack-81.0.0.tgz
+    - https://github.com/platform9/pf9-kube-prometheus-helm-chart/releases/download/kube-prometheus-stack-81.0.0/kube-prometheus-stack-81.0.0.tgz
     version: 81.0.0
   - annotations:
       artifacthub.io/license: Apache-2.0
