@@ -1136,7 +1136,7 @@ grafana:
       enabled: true
       defaultDatasourceEnabled: true
       isDefaultDatasource: true
-
+      url: http://prometheus-operated.pf9-monitoring:9090
       name: Prometheus
       uid: prometheus
 
