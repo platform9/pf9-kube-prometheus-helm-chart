@@ -24,6 +24,11 @@ items:
           - metallb-system
       endpoints:
         - port: monitoring
+          {{- if .Values.metallb.serviceMonitor.https }}
+          scheme: https
+          tlsConfig:
+            insecureSkipVerify: {{ .Values.metallb.serviceMonitor.insecureSkipVerify | default true }}
+          {{- end }}
           interval: {{ .Values.metallb.serviceMonitor.interval | default "30s" }}
           scrapeTimeout: {{ .Values.metallb.serviceMonitor.scrapeTimeout | default "10s" }}
           path: {{ .Values.metallb.serviceMonitor.path | default "/metrics" }}
@@ -47,6 +52,11 @@ items:
           - metallb-system
       endpoints:
         - port: monitoring
+          {{- if .Values.metallb.serviceMonitor.https }}
+          scheme: https
+          tlsConfig:
+            insecureSkipVerify: {{ .Values.metallb.serviceMonitor.insecureSkipVerify | default true }}
+          {{- end }}
           interval: {{ .Values.metallb.serviceMonitor.interval | default "30s" }}
           scrapeTimeout: {{ .Values.metallb.serviceMonitor.scrapeTimeout | default "10s" }}
           path: {{ .Values.metallb.serviceMonitor.path | default "/metrics" }}
