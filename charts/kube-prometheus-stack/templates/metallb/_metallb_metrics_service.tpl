@@ -21,8 +21,8 @@ metadata:
 spec:
   ports:
     - name: monitoring
-      port: 7472
-      targetPort: monitoring
+      port: 9120
+      targetPort: metricshttps
   selector:
 	{{- dict $selectorKey $component | toYaml | nindent 4 }}
 

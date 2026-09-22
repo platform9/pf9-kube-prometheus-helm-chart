@@ -20,7 +20,7 @@ kubeVersionOverride: ""
 
 ## Provide a name to substitute for the full names of resources
 ##
-fullnameOverride: "pf9-prom"
+fullnameOverride: "sys"
 
 ## Labels to apply to all resources
 ##
@@ -485,6 +485,7 @@ alertmanager:
   ## Configuration for Alertmanager service
   ##
   service:
+    enabled: true
     annotations: {}
     labels: {}
     clusterIP: ""
@@ -3194,6 +3195,7 @@ prometheus:
   ## Configuration for Prometheus service
   ##
   service:
+    enabled: true
     annotations: {}
     labels: {}
     clusterIP: ""
@@ -4953,6 +4955,11 @@ metallb:
     interval: 30s
     scrapeTimeout: 10s
     path: /metrics
+    # MetalLB >=0.16.0 removed kube-rbac-proxy and serves metrics over HTTPS
+    # (self-signed cert) on a renamed port. Set to false for clusters still
+    # running MetalLB <0.16.0, which serve plain HTTP metrics.
+    https: true
+    insecureSkipVerify: true
 
   prometheusRule:
     enabled: true
