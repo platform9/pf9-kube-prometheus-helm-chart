@@ -20,7 +20,7 @@ kubeVersionOverride: ""
 
 ## Provide a name to substitute for the full names of resources
 ##
-fullnameOverride: "pf9-prom"
+fullnameOverride: "sys"
 
 ## Labels to apply to all resources
 ##
@@ -485,6 +485,7 @@ alertmanager:
   ## Configuration for Alertmanager service
   ##
   service:
+    enabled: true
     annotations: {}
     labels: {}
     clusterIP: ""
@@ -3194,6 +3195,7 @@ prometheus:
   ## Configuration for Prometheus service
   ##
   service:
+    enabled: true
     annotations: {}
     labels: {}
     clusterIP: ""
@@ -4961,17 +4963,3 @@ metallb:
 
   prometheusRule:
     enabled: true
-
-## Provide a name to substitute for the full names of resources
- ##
-fullnameOverride: "sys"  # default is pf9-prom
-alertmanager:
-   ## Configuration for Alertmanager service
-   ##
-   service:
-    enabled: true  # default is false
-prometheus:
-   ## Configuration for Prometheus service
-   ##
-   service:
-    enabled: true  # default is false
