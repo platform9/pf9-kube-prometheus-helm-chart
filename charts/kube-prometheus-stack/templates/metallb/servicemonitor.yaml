@@ -26,6 +26,7 @@ items:
         - port: monitoring
           {{- if .Values.metallb.serviceMonitor.https }}
           scheme: https
+          bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
           tlsConfig:
             insecureSkipVerify: {{ .Values.metallb.serviceMonitor.insecureSkipVerify | default true }}
           {{- end }}
@@ -54,6 +55,7 @@ items:
         - port: monitoring
           {{- if .Values.metallb.serviceMonitor.https }}
           scheme: https
+          bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
           tlsConfig:
             insecureSkipVerify: {{ .Values.metallb.serviceMonitor.insecureSkipVerify | default true }}
           {{- end }}

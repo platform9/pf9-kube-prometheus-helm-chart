@@ -3579,6 +3579,10 @@ prometheus:
     ##
     enableAdminAPI: false
 
+    ## Enable Prometheus to accept OpenTelemetry metrics on /api/v1/otlp/v1/metrics
+    ##
+    enableOTLPReceiver: false
+
     ## Sets version of Prometheus overriding the Prometheus version as derived
     ## from the image tag. Useful in cases where the tag does not follow semver v2.
     version: ""
