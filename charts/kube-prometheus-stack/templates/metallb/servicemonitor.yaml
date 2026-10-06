@@ -25,6 +25,10 @@ items:
       endpoints:
         - port: monitoring
           {{- if .Values.metallb.serviceMonitor.https }}
+          {{- /* MetalLB >=0.16 authenticates /metrics (TokenReview), so send the Prometheus
+          service account token. bearerTokenFile is the only file-based option (`authorization`
+          needs a Secret) and requires prometheus.prometheusSpec.arbitraryFSAccessThroughSMs not to be
+          denied. See PMK-6975. */}}
           scheme: https
           bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
           tlsConfig:
@@ -54,6 +58,10 @@ items:
       endpoints:
         - port: monitoring
           {{- if .Values.metallb.serviceMonitor.https }}
+          {{- /* MetalLB >=0.16 authenticates /metrics (TokenReview), so send the Prometheus
+          service account token. bearerTokenFile is the only file-based option (`authorization`
+          needs a Secret) and requires prometheus.prometheusSpec.arbitraryFSAccessThroughSMs not to be
+          denied. See PMK-6975. */}}
           scheme: https
           bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
           tlsConfig:
