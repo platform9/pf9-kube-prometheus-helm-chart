@@ -21,8 +21,13 @@ metadata:
 spec:
   ports:
     - name: monitoring
+{{- if $root.Values.metallb.serviceMonitor.https }}
       port: 9120
       targetPort: metricshttps
+{{- else }}
+      port: 7472
+      targetPort: monitoring
+{{- end }}
   selector:
 	{{- dict $selectorKey $component | toYaml | nindent 4 }}
 
