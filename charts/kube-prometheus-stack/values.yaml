@@ -20,7 +20,7 @@ kubeVersionOverride: ""
 
 ## Provide a name to substitute for the full names of resources
 ##
-fullnameOverride: "sys"
+fullnameOverride: "pf9-prom"
 
 ## Labels to apply to all resources
 ##
