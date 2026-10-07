@@ -485,6 +485,7 @@ alertmanager:
   ## Configuration for Alertmanager service
   ##
   service:
+    enabled: true
     annotations: {}
     labels: {}
     clusterIP: ""
@@ -3194,6 +3195,7 @@ prometheus:
   ## Configuration for Prometheus service
   ##
   service:
+    enabled: true
     annotations: {}
     labels: {}
     clusterIP: ""
@@ -3576,6 +3578,10 @@ prometheus:
     ## ref: https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-admin-apis
     ##
     enableAdminAPI: false
+
+    ## Enable Prometheus to accept OpenTelemetry metrics on /api/v1/otlp/v1/metrics
+    ##
+    enableOTLPReceiver: false
 
     ## Sets version of Prometheus overriding the Prometheus version as derived
     ## from the image tag. Useful in cases where the tag does not follow semver v2.
@@ -4953,6 +4959,11 @@ metallb:
     interval: 30s
     scrapeTimeout: 10s
     path: /metrics
+    # MetalLB >=0.16.0 removed kube-rbac-proxy and serves metrics over HTTPS
+    # (self-signed cert) on a renamed port. Set to false for clusters still
+    # running MetalLB <0.16.0, which serve plain HTTP metrics.
+    https: true
+    insecureSkipVerify: true
 
   prometheusRule:
     enabled: true
